@@ -26,7 +26,6 @@ from fasthtml.common import (  # type: ignore
     Link,
     Script,
     Title,
-    picolink,
 )
 from fasthtml.core import Request  # type: ignore
 from langgraph_sdk import get_client
@@ -45,6 +44,12 @@ dlink = Link(
     href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css",
 )
 sselink = Script(src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js")
+# fasthtml dropped the `picolink` convenience export after 0.12; define the
+# Pico CSS stylesheet link explicitly (pinned CDN version, not @latest).
+picolink = Link(
+    rel="stylesheet",
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css",
+)
 # Add custom styles
 custom_styles = Script(
     """

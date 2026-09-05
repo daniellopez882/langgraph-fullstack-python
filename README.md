@@ -22,7 +22,7 @@ process that runs the agent.
 | **Is** | A LangGraph deployment: a configurable ReAct agent + a FastHTML SSE chat UI, run by `langgraph dev` / `langgraph build` |
 | **Agent** | Model, prompt and tools are configuration. With `TAVILY_API_KEY` set, the agent gets web search — the dependency the old graph shipped but never used |
 | **Auth** | Permissive by default for local dev; set `AUTH_TOKEN` to require `Authorization: Bearer <token>` on the deployment API |
-| **Tests** | 36 — no model, no network, no running server; framing, escaping, auth and graph wiring are unit-tested |
+| **Tests** | 38 — no model, no network, no running server; framing, escaping, auth, graph wiring and app boot are unit-tested |
 | **CI** | ruff · `ruff format --check` · `mypy` · pytest on 3.11/3.12 · an auth-enforcement check · bandit · gitleaks · container built and its readiness probe hit |
 
 ## Architecture
@@ -101,6 +101,7 @@ docker run --rm -p 2024:2024 --env-file .env react-agent
 | 3 | The auth hook returned `"default_user"` for every caller | The model-spending deployment API was open to anyone who could reach it |
 | 4 | `yield f"event: message\ndata: {content}\n\n"` | A multi-line reply broke SSE framing and rendered wrong |
 | 5 | Streamed content was swapped into the DOM as `innerHTML` unescaped | A model reply (or quoted tool result) with `<script>` ran in the browser |
+| 6 | `from fasthtml.common import picolink` with `python-fasthtml>=0.12.1` | fasthtml dropped `picolink` after 0.12; a fresh install resolved 0.14 and the server died at boot with `ImportError` — no test imported the module, so only booting the container caught it |
 
 <details>
 <summary>Also</summary>
@@ -127,7 +128,7 @@ src/react_agent/
   sse.py       format_sse (per-line framing) + escape_html
   app.py       FastHTML routes and the streaming UI
 langgraph.json the deployment wiring (graph + auth + http app)
-tests/         36 tests
+tests/         38 tests
 docs/          ADRs, threat model
 ```
 
