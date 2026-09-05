@@ -1,0 +1,8 @@
+# The project is installed from pyproject.toml (uv sync --dev or pip install -e ".[dev]").
+# This file lets CI use plain pip.
+-e .
+pytest==8.4.2
+ruff==0.14.5
+mypy==1.14.1
+bandit==1.9.2
+pip-audit==2.9.0
