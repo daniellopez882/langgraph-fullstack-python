@@ -32,8 +32,11 @@ from fasthtml.core import Request  # type: ignore
 from langgraph_sdk import get_client
 from starlette.responses import RedirectResponse, StreamingResponse
 
+from react_agent.config import settings
+from react_agent.sse import escape_html, format_sse
+
 # Initialize the LangGraph client
-langgraph_client = get_client()
+langgraph_client = get_client(url=settings.LANGGRAPH_URL)
 
 # Define HTML headers for styling and client-side functionality
 tlink = (Script(src="https://cdn.tailwindcss.com"),)
@@ -406,7 +409,7 @@ async def ConversationList(user_id: str, current_thread_id: str) -> Div:
             *[
                 A(
                     Div(
-                        Div(f"Thread {i+1}", cls="font-medium text-sm"),
+                        Div(f"Thread {i + 1}", cls="font-medium text-sm"),
                         Div(f"{thread['created_at']}", cls="text-xs text-gray-500"),
                         cls="flex flex-col",
                     ),
@@ -598,9 +601,12 @@ async def message_generator(thread_id: str, run_id: str) -> AsyncGenerator[str, 
             for chunk_msg in chunk.data:
                 content = chunk_msg.get("content", "")
                 if content:
-                    yield f"event: message\ndata: {content}\n\n"
+                    # Escape before it reaches the DOM (the swap is innerHTML),
+                    # and frame each line as its own data field so multi-line
+                    # replies are not dropped by the browser's EventSource.
+                    yield format_sse(escape_html(content), event="message")
 
-    yield "event: close\ndata:\n\n"
+    yield format_sse("", event="close")
 
 
 # Route to stream assistant responses via SSE
