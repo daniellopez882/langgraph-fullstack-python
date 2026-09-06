@@ -17,8 +17,9 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "langchain-community>=0.2.17",
     "tavily-python>=0.4.0",
-    "python-fasthtml>=0.12.1",
+    "python-fasthtml>=0.12.1,<0.15",
     "langgraph-sdk>=0.1.57",
+    "pydantic-settings>=2.4.0",
 ]
 
 
@@ -40,6 +41,7 @@ packages = ["langgraph.templates.react_agent", "react_agent"]
 "*" = ["py.typed"]
 
 [tool.ruff]
+extend-exclude = [".venv", ".venv312"]
 lint.select = [
     "E",    # pycodestyle
     "F",    # pyflakes
@@ -69,3 +71,8 @@ dev = [
     "langgraph-cli[inmem]>=0.1.83",
     "pytest>=8.3.4",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q --strict-markers"
